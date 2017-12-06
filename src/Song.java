@@ -1,5 +1,3 @@
-package com.company;
-
 public class Song{
 
    /* private final int songID;
