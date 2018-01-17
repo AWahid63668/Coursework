@@ -20,11 +20,13 @@ public class Main extends Application
 {
 
     private final BorderPane root = new BorderPane();
-    private ListView mainListView;
     private VBox playlistOptionBox;
     private HBox optionButtonsBox;
+    private static final ListView mainListView = new ListView();
     private static final String DB_LOCATION = "U://Coputer Science//Coursework//NikolaisVersion.db";
-
+    private static final DBConn dbConn = new DBConn(DB_LOCATION);
+    private static User currentUser = new User("NICK", "is_a_god");
+    private static Playlist currentPlaylist = new Playlist("All Songs", currentUser.getUsername(), false);
 
     @Override
     public void start(Stage stage) throws Exception
@@ -36,7 +38,7 @@ public class Main extends Application
 
         stage.setTitle("Hello World");
         stage.setScene(scene);
-        stage.show();
+
         //BorderPane within Top
         final BorderPane topBorderPane = new BorderPane();
         topBorderPane.setPadding(new Insets(40));
@@ -122,13 +124,11 @@ public class Main extends Application
         outsideBorderPane.setCenter(centreBorderPane);
 
         // Current playlist heading
-        final Label currentPlaylistHeading = new Label("PLAYLIST 1");
+        final Label currentPlaylistHeading = new Label(currentPlaylist.getPlaylistName());
         currentPlaylistHeading.setFont(Font.font("Arial", FontWeight.BOLD, 30));
         centreBorderPane.setTop(currentPlaylistHeading);
 
         // Populating main list view
-        mainListView = new ListView();
-        mainListView.getItems().addAll("Pain - Jimmy Eat World", "Obstacle 1 - Interpol ", "Obstacle 1 - Interpol ", "Obstacle 1 - Interpol ", "Obstacle 1 - Interpol ");
         mainListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         centreBorderPane.setCenter(mainListView);
 
@@ -175,8 +175,14 @@ public class Main extends Application
         bottomBorderPane.setCenter(songSlider);
         BorderPane.setAlignment(songSlider, Pos.CENTER);
 
+        updateListView(currentPlaylist);
+        stage.show();
     }
 
+    private static void updateListView(Playlist playlist)
+    {
+        for (Song song : dbConn.songsFromPlaylist(playlist)) { mainListView.getItems().add(song.getTitle()); }
+    }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException
     {
