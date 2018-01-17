@@ -6,7 +6,7 @@ public class Song
     private String title;
     private String artist;
     private String album;
-    private String filepath;
+    private int length;
 
     public int getSongID() {
         return songID;
@@ -15,26 +15,21 @@ public class Song
     public String getTitle() {
         return title;
     }
-
     public String getArtist() {
         return artist;
     }
-
     public String getAlbum() {
         return album;
     }
+    public int getLength() { return length; }
 
-    public String getFilepath() {
-        return filepath;
-    }
-
-    public Song(int songID, String title, String artist, String album, String filepath)
+    public Song(int songID, String title, String artist, String album, int length)
     {
         this.songID = songID;
         this.title = title;
         this.artist = artist;
         this.album = album;
-        this.filepath = filepath;
+        this.length = length;
     }
 }
 

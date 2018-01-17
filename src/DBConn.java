@@ -8,14 +8,13 @@ import java.util.ArrayList;
 
 public class DBConn
 {
-    private String pathToDatabase;
     private Boolean isOpen = true;
     private Connection connection;
 
-    public DBConn(String dbName) throws SQLException, ClassNotFoundException
+    public DBConn()
     {
-        this.pathToDatabase = dbName;
-        connection = DriverManager.getConnection("jdbc:sqlite:" + pathToDatabase);
+        try { connection = DriverManager.getConnection("jdbc:sqlite:" + "U://Coputer Science//Coursework//NikolaisVersion.db"); }
+        catch (Exception e) { e.printStackTrace(); }
     }
 
     public ResultSet resultSetFromQuery(String query) throws SQLException { return connection.createStatement().executeQuery(query); }
@@ -26,21 +25,50 @@ public class DBConn
         isOpen = false;
     }
 
-    public ArrayList<Song> songsFromPlaylist(String playlistName) throws Exception
+    public ArrayList<Song> songsFromPlaylist(Playlist playlist)
     {
-        if (!isOpen) throw new Exception("Isn't open");
-        final ResultSet resultSet = resultSetFromQuery("SELECT * FROM Songs JOIN Playlist_Songs ON Songs.songID = Playlist_Songs,songID WHERE Playlist_Songs.playlistName = '" + playlistName + "'");
-        final ArrayList<Song> songs = new ArrayList<Song>();
-        while (resultSet.next())
-        {
-            songs.add(new Song(
-                    resultSet.getInt("songID"),
-                    resultSet.getString("title"),
-                    resultSet.getNString("artist"),
-                    resultSet.getNString("album"),
-                    resultSet.getString("filepath")
-            ));
+        ResultSet resultSet;
+        try
+        { resultSet = resultSetFromQuery("SELECT * FROM Songs " +
+                "JOIN Playlists_Songs ON Songs.songID = Playlists_Songs.songID " +
+                "WHERE Playlists_Songs.playlistName = '" + playlist.getPlaylistName() + "'");
         }
+        catch (Exception e) { e.printStackTrace(); return null; }
+        final ArrayList<Song> songs = new ArrayList<>();
+        try
+        {
+            while (resultSet.next())
+            {
+                songs.add(new Song(
+                        resultSet.getInt("songID"),
+                        resultSet.getString("title"),
+                        resultSet.getString("album"),
+                        resultSet.getString("artist"),
+                        resultSet.getInt("length")
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); return null; }
         return songs;
+    }
+
+    public ArrayList<Playlist> allPlaylistsOwnedBy(User user)
+    {
+        ResultSet resultSet;
+        try { resultSet = resultSetFromQuery("SELECT * FROM Playlists WHERE Playlists.username = '" + user.getUsername() + "';"); }
+        catch (Exception e) { e.printStackTrace(); return null; }
+
+        final ArrayList<Playlist> playlists = new ArrayList<>();
+        try
+        {
+            while (resultSet.next())
+            {
+                playlists.add(new Playlist(
+                        resultSet.getString("playlistName"),
+                        resultSet.getString("username"),
+                        resultSet.getBoolean("isUserEditable")
+                ));
+            }
+        } catch (Exception e) { e.printStackTrace(); return null; }
+        return playlists;
     }
 }

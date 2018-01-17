@@ -15,16 +15,16 @@ import javafx.scene.control.ProgressBar;
 
 import java.io.FileInputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class Main extends Application
 {
 
     private final BorderPane root = new BorderPane();
-    private ListView mainListView;
-    private VBox playlistOptionBox;
-    private HBox optionButtonsBox;
-    private static final String DB_LOCATION = "U://Coputer Science//Coursework//NikolaisVersion.db";
-
+    private static final ListView mainListView = new ListView();
+    private static final DBConn dbConn = new DBConn();
+    private static User currentUser = new User("NICK", "is_a_god");
+    private static Playlist currentPlaylist = new Playlist("All Songs", currentUser.getUsername(), false);
 
     @Override
     public void start(Stage stage) throws Exception
@@ -33,10 +33,9 @@ public class Main extends Application
         outsideBorderPane.setStyle("-fx-background-color: green;");
 
         final Scene scene = new Scene(outsideBorderPane, 1024, 768);
-
         stage.setTitle("Hello World");
         stage.setScene(scene);
-        stage.show();
+
         //BorderPane within Top
         final BorderPane topBorderPane = new BorderPane();
         topBorderPane.setPadding(new Insets(40));
@@ -72,17 +71,18 @@ public class Main extends Application
         outsideBorderPane.setLeft(leftHandVBox);
 
         // Playlist heading
-        final Label playlistHeading = new Label( "PLAYLISTS");
+        final Label playlistHeading = new Label( currentUser.getUsername() + "'s playlists");
         playlistHeading.setFont(Font.font("Arial", FontWeight.BOLD, 30));
         leftHandVBox.getChildren().add(playlistHeading);
 
-        final Button[] playlistButtons = new Button[3];
-        for (int i = 0; i < playlistButtons.length; i++)
+        // Playlist buttons
+        final ArrayList<Playlist> allPlaylists = dbConn.allPlaylistsOwnedBy(currentUser);
+        for (final Playlist playlist : allPlaylists)
         {
-            playlistButtons[i] = new Button("Playlist " + (i + 1));
-            playlistButtons[i].setMinSize(200, 10);
+            Button button = new Button(playlist.getPlaylistName());
+            button.setMinSize(200, 10);
+            leftHandVBox.getChildren().add(button);
         }
-        leftHandVBox.getChildren().addAll(playlistButtons);
 
         // Create New Playlist Button
         final Button newPlaylistButton = new Button("Create a new playlist!");
@@ -101,17 +101,18 @@ public class Main extends Application
         rightHandVBox.getChildren().add(rightSubHeading);
 
         // Playlist options buttons
-        playlistOptionBox = new VBox(20);
 
-        final Button[] playlistOptionsButtons = new Button[4];
-        final String[] optionButtonHeaders = {"Add to playlist", "Remove from playlist", "Music Video", "Song Lyrics"};
-        for (int i = 0; i < playlistOptionsButtons.length; i++)
+        final VBox playlistOptionBox = new VBox(20);
         {
-            playlistOptionsButtons[i] = new Button(optionButtonHeaders[i]);
-            playlistOptionsButtons[i].setMinSize(200, 10);
+            final String[] optionButtonHeaders = {"Add to playlist", "Remove from playlist", "Music Video", "Song Lyrics"};
+            for (int i = 0; i < 4; i++)
+            {
+                final Button button = new Button(optionButtonHeaders[i]);
+                button.setMinSize(200, 10);
+                playlistOptionBox.getChildren().add(button);
+            }
         }
 
-        playlistOptionBox.getChildren().addAll(playlistOptionsButtons);
         rightHandVBox.getChildren().add(playlistOptionBox);
         outsideBorderPane.setRight(rightHandVBox);
 
@@ -122,13 +123,11 @@ public class Main extends Application
         outsideBorderPane.setCenter(centreBorderPane);
 
         // Current playlist heading
-        final Label currentPlaylistHeading = new Label("PLAYLIST 1");
+        final Label currentPlaylistHeading = new Label(currentPlaylist.getPlaylistName());
         currentPlaylistHeading.setFont(Font.font("Arial", FontWeight.BOLD, 30));
         centreBorderPane.setTop(currentPlaylistHeading);
 
         // Populating main list view
-        mainListView = new ListView();
-        mainListView.getItems().addAll("Pain - Jimmy Eat World", "Obstacle 1 - Interpol ", "Obstacle 1 - Interpol ", "Obstacle 1 - Interpol ", "Obstacle 1 - Interpol ");
         mainListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         centreBorderPane.setCenter(mainListView);
 
@@ -145,14 +144,15 @@ public class Main extends Application
         bottomHandHBox.setStyle("-fx-background-color: orange;");
 
         // Playlist options buttons
-        optionButtonsBox = new HBox(100);
+        final HBox optionButtonsBox = new HBox(100);
         final Button[] optionButtons = new Button[6];
-        final String[] optionButtonNames = {"Shuffle", "Last Song", "Pause", "Play", "Next Song", "Repeat"};
-
-        for (int i = 0; i < optionButtons.length; i++)
         {
-            optionButtons[i] = new Button(optionButtonNames[i]);
-            optionButtons[i].setMinSize(70, 20);
+            final String[] optionButtonNames = {"Shuffle", "Last Song", "Pause", "Play", "Next Song", "Repeat"};
+            for (int i = 0; i < optionButtons.length; i++)
+            {
+                optionButtons[i] = new Button(optionButtonNames[i]);
+                optionButtons[i].setMinSize(70, 20);
+            }
         }
 
         optionButtonsBox.getChildren().addAll(optionButtons);
@@ -175,8 +175,14 @@ public class Main extends Application
         bottomBorderPane.setCenter(songSlider);
         BorderPane.setAlignment(songSlider, Pos.CENTER);
 
+        updateListView(currentPlaylist);
+        stage.show();
     }
 
+    private static void updateListView(Playlist playlist)
+    {
+        for (Song song : dbConn.songsFromPlaylist(playlist)) { mainListView.getItems().add(song.getTitle()); }
+    }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException
     {
