@@ -1,30 +1,40 @@
-public class Song{
+package sample;
 
-   /* private final int songID;
-    private final String songName;
-    private String SongName;
-    private int artistID;
-    private int albumID;
-    private String fileLoc;
-    private int trackNumber;
+public class Song
+{
+    private int songID;
+    private String title;
+    private String artist;
+    private String album;
+    private String filepath;
 
-    public Song(int songID, int artistID, int albumID, String fileLoc, int trackNumber) {
-        this(songID,songName, artistID, albumID, fileLoc, trackNumber);
+    public int getSongID() {
+        return songID;
     }
 
-    public Song(int songID, String songName, int artistID, int albumID, String fileLoc, int trackNumber ) {
+    public String getTitle() {
+        return title;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public String getFilepath() {
+        return filepath;
+    }
+
+    public Song(int songID, String title, String artist, String album, String filepath)
+    {
         this.songID = songID;
-        this.songName = songName;
-        this.artistID = artistID;
-        this.albumID = albumID;
-        this.fileLoc = fileLoc;
-        this.trackNumber = trackNumber;
+        this.title = title;
+        this.artist = artist;
+        this.album = album;
+        this.filepath = filepath;
     }
-
-    public int getAlbumID() {
-        return albumID;
-
-    }*/
 }
-
 
