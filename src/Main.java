@@ -1,6 +1,6 @@
-package sample;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,42 +14,43 @@ import javafx.stage.Stage;
 import javafx.scene.control.ProgressBar;
 
 import java.io.FileInputStream;
-import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class Main extends Application
 {
 
-    private final BorderPane root = new BorderPane();
-    private static final ListView mainListView = new ListView();
-    private static final DBConn dbConn = new DBConn();
-    private static User currentUser = new User("NICK", "is_a_god");
-    private static Playlist currentPlaylist = new Playlist("All Songs", currentUser.getUsername(), false);
-
+    private BorderPane root = new BorderPane();
+    private ListView listView;
+    private VBox boxOfButtons;
+    private HBox setOfButtons;
+    private DBConn dbConn = new DBConn();
+    private MP3Player player;
     @Override
     public void start(Stage stage) throws Exception
     {
-        final BorderPane outsideBorderPane = new BorderPane();
+        player  = new MP3Player();
+        BorderPane outsideBorderPane = new BorderPane();
         outsideBorderPane.setStyle("-fx-background-color: green;");
 
-        final Scene scene = new Scene(outsideBorderPane, 1024, 768);
+        Scene scene = new Scene(outsideBorderPane); //1024, 768);
+
         stage.setTitle("Hello World");
         stage.setScene(scene);
-
-        //BorderPane within Top
-        final BorderPane topBorderPane = new BorderPane();
+        stage.show();
+        //BorderPane within To
+        BorderPane topBorderPane = new BorderPane();
         topBorderPane.setPadding(new Insets(40));
         topBorderPane.setStyle("-fx-background-color: red;");
         outsideBorderPane.setTop(topBorderPane);
 
-        // SEARCH BAR
-        final TextField searchbar = new TextField();
+        /// /SEARCH BAR
+
+        TextField searchbar = new TextField();
         searchbar.setPromptText("Search album, song or album");
         searchbar.setPrefSize(100, 20);
         BorderPane.setAlignment(searchbar, Pos.CENTER);
         topBorderPane.setCenter(searchbar);
 
-        // LOGO
+        //LOGO
         final FileInputStream file = new FileInputStream("U:\\Logo.png");
         final Image image = new Image(file);
         final ImageView imageView = new ImageView(image);
@@ -57,79 +58,103 @@ public class Main extends Application
         imageView.setFitWidth(125);
         topBorderPane.setLeft(imageView);
 
-        // LOGOUT BUTTON
-        final Button logoutButton = new Button("Log Out");
+        //LOGOUT BUTTON
+
+        Button logoutButton = new Button("Log Out");
         logoutButton.setPrefSize(100, 20);
         BorderPane.setAlignment(logoutButton, Pos.CENTER_RIGHT);
         topBorderPane.setRight(logoutButton);
 
         // LEFT OF MAIN BORDER PANE
-        final VBox leftHandVBox = new VBox();
+        VBox leftHandVBox = new VBox();
+
+        BorderPane LeftBorderPane = new BorderPane();
+        LeftBorderPane.setPadding(new Insets(40));
+        LeftBorderPane.setStyle("-fx-background-color: blue");
+        outsideBorderPane.setLeft(LeftBorderPane);
+
+        Label subheading = new Label( "Playlists");
+        subheading.setFont(Font.font("Arial", FontWeight.BOLD, 30));
+        leftHandVBox.getChildren().add(subheading);
+
+
         leftHandVBox.setPadding(new Insets(10));
         leftHandVBox.setSpacing(20);
         leftHandVBox.setStyle("-fx-background-color:purple");
+
+        //leftHandVBox = new VBox(10);
+
+        Button[] myButtons;
+        myButtons = new Button[4];
+
+
+        myButtons[0] = new Button("Playlist 1");
+        myButtons[0].setPrefSize(200, 10);
+
+        myButtons[1] = new Button("Playlist 2");
+        myButtons[1].setPrefSize(200, 10);
+
+        myButtons[2] = new Button("Playlist 3");
+        myButtons[2].setPrefSize(200, 10);
+
+        myButtons[3] = new Button("Create A New Playlist");
+        myButtons[3].setPrefSize(200, 10);
+
+        leftHandVBox.getChildren().addAll(myButtons);
+
         outsideBorderPane.setLeft(leftHandVBox);
 
-        // Playlist heading
-        final Label playlistHeading = new Label( currentUser.getUsername() + "'s playlists");
-        playlistHeading.setFont(Font.font("Arial", FontWeight.BOLD, 30));
-        leftHandVBox.getChildren().add(playlistHeading);
+        // RIGHT OF MAIN BORDER PANE
 
-        // Playlist buttons
-        final ArrayList<Playlist> allPlaylists = dbConn.allPlaylistsOwnedBy(currentUser);
-        for (final Playlist playlist : allPlaylists)
-        {
-            Button button = new Button(playlist.getPlaylistName());
-            button.setMinSize(200, 10);
-            leftHandVBox.getChildren().add(button);
-        }
-
-        // Create New Playlist Button
-        final Button newPlaylistButton = new Button("Create a new playlist!");
-        newPlaylistButton.setMinSize(200, 10);
-        leftHandVBox.getChildren().add(newPlaylistButton);
-
-        // RIGHT OF MAIN BORDER PANE -- PLAYLIST OPTION BUTTONS
         VBox rightHandVBox = new VBox();
         rightHandVBox.setPadding(new Insets(10));
         rightHandVBox.setSpacing(20);
         rightHandVBox.setStyle("-fx-background-color: Pink;");
 
-        // Customise subheading
-        final Label rightSubHeading = new Label("Customise");
-        rightSubHeading.setFont(Font.font("Arial", FontWeight.BOLD, 30));
-        rightHandVBox.getChildren().add(rightSubHeading);
+        subheading = new Label("Customise");
+        subheading.setFont(Font.font("Arial", FontWeight.BOLD, 30));
+        rightHandVBox.getChildren().add(subheading);
 
-        // Playlist options buttons
+        boxOfButtons = new VBox(20);
 
-        final VBox playlistOptionBox = new VBox(20);
-        {
-            final String[] optionButtonHeaders = {"Add to playlist", "Remove from playlist", "Music Video", "Song Lyrics"};
-            for (int i = 0; i < 4; i++)
-            {
-                final Button button = new Button(optionButtonHeaders[i]);
-                button.setMinSize(200, 10);
-                playlistOptionBox.getChildren().add(button);
-            }
-        }
+        myButtons = new Button[4];
 
-        rightHandVBox.getChildren().add(playlistOptionBox);
+        myButtons[0] = new Button("Add To playlist");
+        myButtons[0].setPrefSize(200, 10);
+
+        myButtons[1] = new Button("Remove From Playlist");
+        myButtons[1].setPrefSize(200, 10);
+
+        myButtons[2] = new Button("Music Video");
+        myButtons[2].setPrefSize(200, 10);
+
+        myButtons[3] = new Button("Song Lyrics");
+        myButtons[3].setPrefSize(200, 10);
+
+        boxOfButtons.getChildren().addAll(myButtons);
+
+        rightHandVBox.getChildren().add(boxOfButtons);
+
         outsideBorderPane.setRight(rightHandVBox);
 
-        // CENTRE PLAYLIST BORDER PANE
+        //BorderPane within Centre
         BorderPane centreBorderPane = new BorderPane();
         centreBorderPane.setPadding(new Insets(40));
         centreBorderPane.setStyle("-fx-background-color: yellow;");
         outsideBorderPane.setCenter(centreBorderPane);
 
-        // Current playlist heading
-        final Label currentPlaylistHeading = new Label(currentPlaylist.getPlaylistName());
-        currentPlaylistHeading.setFont(Font.font("Arial", FontWeight.BOLD, 30));
-        centreBorderPane.setTop(currentPlaylistHeading);
+        subheading = new Label("PLAYLIST 1");
+        subheading.setFont(Font.font("Arial", FontWeight.BOLD, 30));
+        centreBorderPane.setTop(subheading);
 
-        // Populating main list view
-        mainListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        centreBorderPane.setCenter(mainListView);
+        listView = new ListView();
+        player.loadAllSongs();
+        listView.getItems().addAll(dbConn.allSongNames());
+        listView.getSelectionModel().selectedIndexProperty().addListener( (dontNeedThis, dontNeedThisEither, index) -> {
+            final int indexAsInt = (int) index;
+            if (indexAsInt >= 0 && indexAsInt < listView.getItems().size()) { player.skipTo(indexAsInt); System.out.println("hi"); }
+        });
+        centreBorderPane.setCenter(listView);
 
         //Creating BottomBorderPane
         BorderPane bottomBorderPane = new BorderPane();
@@ -143,49 +168,59 @@ public class Main extends Application
         bottomHandHBox.setSpacing(20);
         bottomHandHBox.setStyle("-fx-background-color: orange;");
 
-        // Playlist options buttons
-        final HBox optionButtonsBox = new HBox(100);
-        final Button[] optionButtons = new Button[6];
-        {
-            final String[] optionButtonNames = {"Shuffle", "Last Song", "Pause", "Play", "Next Song", "Repeat"};
-            for (int i = 0; i < optionButtons.length; i++)
-            {
-                optionButtons[i] = new Button(optionButtonNames[i]);
-                optionButtons[i].setMinSize(70, 20);
-            }
-        }
+        setOfButtons = new HBox(10);
 
-        optionButtonsBox.getChildren().addAll(optionButtons);
-        bottomHandHBox.getChildren().add(optionButtonsBox);
-        bottomBorderPane.setTop(bottomHandHBox);
+        myButtons = new Button[6];
 
-        // song progress bar
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.setPrefSize(250, 10);
-        progressBar.setProgress(0.5);
-        bottomBorderPane.setBottom(progressBar);
-        BorderPane.setAlignment(progressBar, Pos.CENTER);
+        myButtons[0] = new Button("Shuffle");
+        myButtons[0].setOnAction((ActionEvent ae) -> player.shuffle());
+        myButtons[0].setPrefSize(50, 50);
+
+        myButtons[1] = new Button("Last Song");
+        myButtons[1].setOnAction((ActionEvent ae) -> player.skipBackward());
+        myButtons[1].setPrefSize(50, 50);
+
+        myButtons[2] = new Button("Pause");
+        myButtons[2].setOnAction((ActionEvent ae) -> player.pause());
+        myButtons[2].setPrefSize(50, 50);
+
+        myButtons[3] = new Button("Play");
+        myButtons[3].setOnAction((ActionEvent ae) -> player.play());
+        myButtons[3].setPrefSize(50, 50);
+
+        myButtons[4] = new Button("Next Song");
+        myButtons[4].setOnAction((ActionEvent ae) -> player.skipForward());
+        myButtons[4].setPrefSize(50, 50);
+
+        myButtons[5] = new Button("Repeat");
+        myButtons[5].setOnAction((ActionEvent ae) -> player.setRepeating());
+        myButtons[5].setPrefSize(50, 50);
+
+        setOfButtons.getChildren().addAll(myButtons);
+
+        bottomHandHBox.getChildren().add(setOfButtons);
+
+        outsideBorderPane.setBottom(bottomHandHBox);
 
         //slider for song length
-        Slider songSlider = new Slider();
-        songSlider.setMin(0);
-        songSlider.setMax(100);
-        songSlider.setValue(50);
-        songSlider.valueProperty().addListener((observable, old, newVal) -> progressBar.setProgress(newVal.doubleValue() / 100));
-        bottomBorderPane.setCenter(songSlider);
-        BorderPane.setAlignment(songSlider, Pos.CENTER);
+        Slider songlengthslider = new Slider();
+        songlengthslider.setMin(0);
+        songlengthslider.setMax(100);
+        songlengthslider.setValue(50);
+        // songlengthslider.valueProperty().addListener(() -> ); DO THIS IN A BIT
 
-        updateListView(currentPlaylist);
-        stage.show();
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setPrefSize(400, 30);
+        progressBar.setProgress(0.5);
+
+        songlengthslider.valueProperty().addListener(
+                (observable, old_value, new_value) -> progressBar.setProgress(new_value.doubleValue() / 100));
+
+       bottomHandHBox.getChildren().add(songlengthslider);
+        dbConn.close();
     }
 
-    private static void updateListView(Playlist playlist)
-    {
-        for (Song song : dbConn.songsFromPlaylist(playlist)) { mainListView.getItems().add(song.getTitle()); }
-    }
 
-    public static void main(String[] args) throws SQLException, ClassNotFoundException
-    {
+    public static void main(String[] args) {
         launch(args);
-    }
-}
+    }}
